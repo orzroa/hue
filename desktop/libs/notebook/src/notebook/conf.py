@@ -64,15 +64,17 @@ def check_has_missing_permission(user, interpreter, user_apps=None):
   # TODO: port to cluster config
   if user_apps is None:
     user_apps = appmanager.get_apps_dict(user)  # Expensive method
-  return (interpreter == 'hive' and 'hive' not in user_apps) or \
-         (interpreter == 'impala' and 'impala' not in user_apps) or \
-         (interpreter == 'pig' and 'pig' not in user_apps) or \
-         (interpreter == 'trino' and not user.has_hue_permission(action="access", app='trino')) or \
-         (interpreter == 'szjb' and not user.has_hue_permission(action="access", app='szjb')) or \
-         (interpreter == 'ck' and not user.has_hue_permission(action="access", app='ck')) or \
-         (interpreter == 'solr' and 'search' not in user_apps) or \
-         (interpreter in ('spark', 'pyspark', 'r', 'jar', 'py', 'sparksql') and 'spark' not in user_apps) or \
-         (interpreter in ('java', 'spark2', 'mapreduce', 'shell', 'sqoop1', 'distcp') and 'oozie' not in user_apps)
+
+  if interpreter in ('hive', 'impala', 'pig'):
+    return interpreter not in user_apps
+  elif interpreter == 'solr':
+    return'search' not in user_apps
+  elif interpreter in ('spark', 'pyspark', 'r', 'jar', 'py', 'sparksql'):
+    return'spark' not in user_apps
+  elif interpreter in ('java', 'spark2', 'mapreduce', 'shell', 'sqoop1', 'distcp'):
+    return'oozie' not in user_apps
+  else:
+    return not user.has_hue_permission(action="access", app=interpreter)
 
 
 def _connector_to_interpreter(connector):
