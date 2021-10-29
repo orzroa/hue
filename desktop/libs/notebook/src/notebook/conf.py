@@ -52,6 +52,14 @@ def _remove_duplications(a_list):
   return list(OrderedDict.fromkeys(a_list))
 
 
+'''
+INSERT INTO huews.useradmin_huepermission (app,`action`,description) VALUES
+     ('trino','access','Launch this application'),
+     ('szjb','access','Launch this application'),
+     ('ck','access','Launch this application');
+'''
+
+
 def check_has_missing_permission(user, interpreter, user_apps=None):
   # TODO: port to cluster config
   if user_apps is None:
@@ -59,6 +67,9 @@ def check_has_missing_permission(user, interpreter, user_apps=None):
   return (interpreter == 'hive' and 'hive' not in user_apps) or \
          (interpreter == 'impala' and 'impala' not in user_apps) or \
          (interpreter == 'pig' and 'pig' not in user_apps) or \
+         (interpreter == 'trino' and not user.has_hue_permission(action="access", app='trino')) or \
+         (interpreter == 'szjb' and not user.has_hue_permission(action="access", app='szjb')) or \
+         (interpreter == 'ck' and not user.has_hue_permission(action="access", app='ck')) or \
          (interpreter == 'solr' and 'search' not in user_apps) or \
          (interpreter in ('spark', 'pyspark', 'r', 'jar', 'py', 'sparksql') and 'spark' not in user_apps) or \
          (interpreter in ('java', 'spark2', 'mapreduce', 'shell', 'sqoop1', 'distcp') and 'oozie' not in user_apps)
